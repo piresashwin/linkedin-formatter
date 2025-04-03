@@ -1,12 +1,152 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-model users {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  Profile         Profile?
+  UserPlanHistory UserPlanHistory[]
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @id @map("_id")
+  userId               String  @db.ObjectId
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, credentialID])
+}
+
+model Profile {
+  id             String    @id @map("_id") @db.ObjectId // Same as user ID
+  userId         String    @unique @db.ObjectId
+  name           String
+  email          String    @unique
+  profilePicture String?
+  planId         String?   @db.ObjectId
+  purchaseDate   DateTime?
+  expiryDate     DateTime?
+  isExpired      Boolean   @default(false)
+  dateCreated    DateTime  @default(now())
+  dateModified   DateTime  @updatedAt
+
+  user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plans? @relation(fields: [planId], references: [id], onDelete: SetNull)
+}
+
+model Series {
+  id                  String   @id @map("_id") @db.ObjectId
+  name                String
+  description         String?
+  cover               String?
+  totalPosts          Int      @default(0)
+  totalDraftPosts     Int      @default(0)
+  totalPublishedPosts Int      @default(0)
+  dateCreated         DateTime @default(now())
+  dateModified        DateTime @updatedAt
+  userId              String   @db.ObjectId
+}
+
+model Post {
+  id           String    @id @map("_id") @db.ObjectId
+  name         String
+  description  String?
+  content      String
+  isPublished  Boolean   @default(false)
+  publishDate  DateTime?
+  releaseDate  DateTime?
+  dateCreated  DateTime  @default(now())
+  dateModified DateTime  @updatedAt
+  userId       String    @db.ObjectId
+}
+
+model Plans {
+  id              String            @id @map("_id") @db.ObjectId
+  name            String
+  description     String?
+  priceUsd        Float             @default(0.0)
+  freeCredits     Int               @default(0)
+  isFree          Boolean           @default(false)
+  Profile         Profile[]
+  UserPlanHistory UserPlanHistory[]
+}
+
+model UserPlanHistory {
+  id           String    @id @map("_id") @db.ObjectId
+  userId       String    @db.ObjectId
+  planId       String    @db.ObjectId
+  purchaseDate DateTime
+  expiryDate   DateTime?
+  priceUsd     Float     @default(0.0)
+  isFree       Boolean   @default(false)
+  cancelDate   DateTime?
+  isCancelled  Boolean   @default(false)
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plans @relation(fields: [planId], references: [id], onDelete: Cascade)
 }
