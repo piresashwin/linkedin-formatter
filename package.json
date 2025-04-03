@@ -9,8 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.8.0",
+    "@auth/prisma-adapter": "2.7.2",
     "@prisma/client": "^6.5.0",
+    "bcrypt-edge": "^0.1.0",
     "linkedin-formatter": "file:",
     "next": "15.2.4",
     "next-auth": "^5.0.0-beta.25",

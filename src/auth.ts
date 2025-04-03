@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
 import { saltAndHashPassword } from "./lib/password";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
@@ -7,16 +8,19 @@ import { prisma } from "./prisma";
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: PrismaAdapter(prisma),
     providers: [
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET
+        }),
         Credentials({
             credentials: {
                 email: {},
                 password: { type: "text", label: "Password" },
-                salt: {},
             },
             authorize: async (credentials) => {
                 let user = null;
 
-                const { salt, hashedPassword } = saltAndHashPassword(credentials.password as string);
+                const hashedPassword = await saltAndHashPassword(credentials.password as string);
 
                 // Get the user from the database
                 if (!user) {

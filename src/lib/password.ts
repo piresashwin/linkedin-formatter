@@ -1,35 +1,22 @@
-import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt-edge';
+
+const SALT_ROUNDS = 10;
 
 /**
- * Generates a salt and hashes the password using the salt.
+ * Generates a salt and hashes the password using bcrypt.
  * @param password - The plain text password to hash.
- * @returns An object containing the salt and the hashed password.
+ * @returns A promise that resolves to the hashed password (contains the salt embedded).
  */
-export function saltAndHashPassword(password: string): { salt: string; hashedPassword: string } {
-    // Generate a random salt
-    const salt = crypto.randomBytes(16).toString('hex');
-
-    // Hash the password with the salt
-    const hashedPassword = crypto
-        .pbkdf2Sync(password, salt, 1000, 64, 'sha512')
-        .toString('hex');
-
-    return { salt, hashedPassword };
+export async function saltAndHashPassword(password: string): Promise<string> {
+    return bcrypt.hashSync(password, SALT_ROUNDS);
 }
 
 /**
- * Verifies if a given password matches the hashed password using the provided salt.
+ * Verifies if a given password matches the hashed password.
  * @param password - The plain text password to verify.
- * @param salt - The salt used to hash the original password.
- * @param hashedPassword - The hashed password to compare against.
- * @returns A boolean indicating whether the password is valid.
+ * @param hashedPassword - The hashed password to compare against (includes the salt).
+ * @returns A promise that resolves to a boolean indicating whether the password is valid.
  */
-export function verifyPassword(password: string, salt: string, hashedPassword: string): boolean {
-    // Hash the input password with the provided salt
-    const hashToVerify = crypto
-        .pbkdf2Sync(password, salt, 1000, 64, 'sha512')
-        .toString('hex');
-
-    // Compare the generated hash with the stored hash
-    return hashToVerify === hashedPassword;
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compareSync(password, hashedPassword);
 }
