@@ -113,6 +113,8 @@ model Series {
   dateCreated         DateTime @default(now())
   dateModified        DateTime @updatedAt
   userId              String   @db.ObjectId
+
+  posts               Post[]   // Relation to Post
 }
 
 model Post {
@@ -126,6 +128,9 @@ model Post {
   dateCreated  DateTime  @default(now())
   dateModified DateTime  @updatedAt
   userId       String    @db.ObjectId
+  seriesId     String?   @db.ObjectId // Add seriesId as a foreign key
+
+  series       Series?   @relation(fields: [seriesId], references: [id], onDelete: SetNull) // Relation to Series
 }
 
 model Plans {
@@ -140,7 +145,7 @@ model Plans {
 }
 
 model UserPlanHistory {
-  id           String    @id @map("_id") @db.ObjectId
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   userId       String    @db.ObjectId
   planId       String    @db.ObjectId
   purchaseDate DateTime

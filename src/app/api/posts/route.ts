@@ -7,7 +7,7 @@ import { prisma } from "@/prisma";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { name, description, content, isPublished, publishDate, releaseDate, userId } = body;
+        const { name, description, content, isPublished, publishDate, releaseDate, userId, seriesId } = body;
 
         if (!name || !content || !userId) {
             return NextResponse.json({ error: "Name, content, and userId are required" }, { status: 400 });
@@ -23,6 +23,7 @@ export async function POST(req: Request) {
                 publishDate,
                 releaseDate,
                 userId,
+                seriesId, // Include seriesId in the creation
             },
         });
 
@@ -63,7 +64,7 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
     try {
         const body = await req.json();
-        const { id, name, description, content, isPublished, publishDate, releaseDate } = body;
+        const { id, name, description, content, isPublished, publishDate, releaseDate, seriesId } = body;
 
         if (!id) {
             return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -78,6 +79,7 @@ export async function PUT(req: Request) {
                 isPublished,
                 publishDate,
                 releaseDate,
+                seriesId, // Allow updating seriesId
             },
         });
 

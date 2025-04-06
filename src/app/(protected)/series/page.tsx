@@ -7,23 +7,33 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EllipsisVerticalIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
+import { ObjectId } from "bson";
+import { desc } from "motion/react-client";
+import { useEffect } from "react";
 
 
 const seriesSchema = z.object({
-    id: z.string(),
-    title: z.string().min(1, "Title is required"),
+    id: z.string().optional(),
+    name: z.string().min(1, "Title is required"),
     color: z.string().min(1, "Color is required"),
     emoji: z.string().min(1, "Emoji is required"),
+    description: z.string().optional(),
 });
 
 type Series = z.infer<typeof seriesSchema>;
 
 const SeriesPage = () => {
-    const [series, setSeries] = useState<Series[]>([
-        { id: "1", title: "Tech Series 🚀", color: "#6CB2EB", emoji: "🚀" },
-        { id: "2", title: "Lifestyle Series 🌿", color: "#F87171", emoji: "🌿" },
-        { id: "3", title: "Education Series 📚", color: "#A78BFA", emoji: "📚" },
-    ]);
+    const [series, setSeries] = useState<Series[]>([]);
+
+    useEffect(() => {
+        const fetchSeries = async () => {
+            const response = await fetch("/api/series");
+            const data = await response.json();
+            setSeries(data?.data || []);
+        };
+
+        fetchSeries();
+    }, []);
 
     const [editingSeries, setEditingSeries] = useState<Series | null>(null);
 
@@ -48,12 +58,18 @@ const SeriesPage = () => {
         resolver: zodResolver(seriesSchema),
     });
 
+    const onError = (errors: any) => {
+        debugger;
+    }
+
     const createSeries = async (data: Series) => {
+        debugger
         const newSeries = {
-            id: (series.length + 1).toString(),
-            title: `${data.title} ${data.emoji}`,
+            id: new ObjectId().toString(),
+            name: `${data.name} ${data.emoji}`,
             color: data.color,
             emoji: data.emoji,
+            description: "",
         };
 
         // Send POST request to API
@@ -77,7 +93,7 @@ const SeriesPage = () => {
 
         setSeries(
             series.map((item) =>
-                item.id === id ? { ...item, title: updatedTitle } : item
+                item.id === id ? { ...item, name: updatedTitle } : item
             )
         );
     };
@@ -113,7 +129,7 @@ const SeriesPage = () => {
                                     Create New Series
                                 </Dialog.Title>
                                 <form
-                                    onSubmit={handleSubmit(createSeries)}
+                                    onSubmit={handleSubmit(createSeries, onError)}
                                     className="space-y-5"
                                 >
                                     <div>
@@ -121,12 +137,12 @@ const SeriesPage = () => {
                                             <span className="text-sm font-medium">Series Title</span>
                                             <input
                                                 type="text"
-                                                {...register("title")}
-                                                className={`px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 ${errors.title ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-500"
+                                                {...register("name")}
+                                                className={`px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 ${errors.name ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-500"
                                                     }`}
                                                 placeholder="Enter Series Title"
                                             />
-                                            {errors.title && <span className="text-sm text-red-500">{errors.title.message}</span>}
+                                            {errors.name && <span className="text-sm text-red-500">{errors.name.message}</span>}
                                         </label>
 
                                     </div>
@@ -214,7 +230,7 @@ const SeriesPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1, duration: 0.3 }}
                     >
-                        {item.title}
+                        {item.name}
                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                                 onClick={() => setEditingSeries(item)}
@@ -228,7 +244,7 @@ const SeriesPage = () => {
 
                 {series.length === 0 && (
                     <div className="col-span-full flex flex-col items-center justify-center py-5 rounded-lg border-2 border-dashed border-gray-300 text-gray-500">
-                         📂
+                        📂
                         <p className="text-sm">No series available. Create a new series to get started!</p>
                     </div>
                 )}

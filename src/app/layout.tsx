@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -22,7 +23,9 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${montserrat.variable} antialiased`}
       >
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );
