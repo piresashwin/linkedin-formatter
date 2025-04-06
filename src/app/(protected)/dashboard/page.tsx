@@ -7,6 +7,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 const DashboardPage = () => {
     const { data: session } = useSession();
 
+    console.log(session);
+
     // Mock data for stats and charts
     const stats = {
         totalPosts: 120,

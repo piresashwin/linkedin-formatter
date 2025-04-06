@@ -128,7 +128,7 @@ const SeriesPage = () => {
                                             />
                                             {errors.title && <span className="text-sm text-red-500">{errors.title.message}</span>}
                                         </label>
-                                       
+
                                     </div>
                                     <div>
                                         <label
@@ -225,6 +225,13 @@ const SeriesPage = () => {
                         </div>
                     </motion.div>
                 ))}
+
+                {series.length === 0 && (
+                    <div className="col-span-full flex flex-col items-center justify-center py-5 rounded-lg border-2 border-dashed border-gray-300 text-gray-500">
+                         📂
+                        <p className="text-sm">No series available. Create a new series to get started!</p>
+                    </div>
+                )}
             </div>
         </div>
     );

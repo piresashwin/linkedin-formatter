@@ -45,10 +45,11 @@ const SidebarNav = () => {
             {/* Profile and Settings */}
             <div className="p-4 space-y-2">
                 {session?.user && (
-                    <div className="flex items-center justify-between mb-4">
+
+                    <Link href="/profile" className=" flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
                             <img
-                                src={session.user.image || "/default-avatar.png"}
+                                src={session.user.image || "/images/avatar.jpg"}
                                 alt="Profile"
                                 className="w-10 h-10 rounded-full border border-gray-300"
                             />
@@ -64,7 +65,7 @@ const SidebarNav = () => {
                         >
                             <ArrowLeftOnRectangleIcon className="w-6 h-6" />
                         </button>
-                    </div>
+                    </Link>
                 )}
             </div>
         </aside>

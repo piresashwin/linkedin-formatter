@@ -6,6 +6,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { z } from "zod";
 import { motion } from "motion/react";
 import { useSession } from "next-auth/react";
+import { Plans } from "@prisma/client";
 
 const ProfilePage = () => {
 
@@ -20,7 +21,24 @@ const ProfilePage = () => {
     });
 
 
-    const plans = ["Free", "Pro", "Enterprise"];
+    const [plans, setPlans] = useState<Plans[]>([]);
+
+    React.useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const response = await fetch("/api/plans");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch plans");
+                }
+                const data = await response.json();
+                setPlans(data);
+            } catch (error) {
+                console.error("Error fetching plans:", error);
+            }
+        };
+
+        fetchPlans();
+    }, []);
 
     const [profile, setProfile] = useState({
         name: "",
@@ -101,16 +119,16 @@ const ProfilePage = () => {
                 {/* Profile Tab */}
                 <Tabs.Content value="profile" className="space-y-6 mt-10">
                     {/* <h1 className="text-xl font-semibold text-gray-800">Edit Profile</h1> */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-w-lg">
                         {/* Profile Picture */}
                         <div className="flex items-center space-x-4">
                             <img
-                                src={profile.profilePicture}
+                                src={profile.profilePicture ?? "/images/avatar.jpg"}
                                 alt="Profile"
                                 className="w-20 h-20 rounded-full border border-gray-300"
                             />
-                            <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
-                                Change Picture
+                            <label className="px-4 py-1.5 text-sm bg-black text-white rounded-lg cursor-pointer hover:bg-gray-800">
+                                Change Profile Picture
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -157,8 +175,8 @@ const ProfilePage = () => {
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             >
                                 {plans.map((plan) => (
-                                    <option key={plan} value={plan}>
-                                        {plan}
+                                    <option key={plan.id} value={plan.id}>
+                                        {plan.name}
                                     </option>
                                 ))}
                             </select>
