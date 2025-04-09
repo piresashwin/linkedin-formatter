@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import { ObjectId } from "bson";
 import { desc } from "motion/react-client";
 import { useEffect } from "react";
+import Link from "next/link";
 
 
 const seriesSchema = z.object({
@@ -238,6 +239,28 @@ const SeriesPage = () => {
                             >
                                 <EllipsisVerticalIcon className="w-5 h-5" />
                             </button>
+                        </div>
+
+                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Link
+                                href={`/series/${item.id}`}
+                                className="p-1 bg-gray-800 text-white rounded-full hover:bg-gray-700"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            </Link>
                         </div>
                     </motion.div>
                 ))}

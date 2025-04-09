@@ -1,9 +1,9 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Logo from "@/ui/shared/Logo";
@@ -16,8 +16,27 @@ const loginSchema = z.object({
 
 const LoginPage = () => {
 
+    const { data: session } = useSession();
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const Loginerror = searchParams.get("error");
+
+    if (session && session?.user?.id) {
+        // Redirect to dashboard if already logged in
+        router.push("/dashboard");
+    }
+
+    const getErrorMessage = (error: string | null) => {
+        switch (error) {
+            case "OAuthAccountNotLinked":
+                return "An account with this email already exists. Please sign in using the originally used provider.";
+            case "AccessDenied":
+                return "Access denied. Please try again.";
+            default:
+                return null;
+        }
+    };
 
     const {
         register,
@@ -63,6 +82,12 @@ const LoginPage = () => {
                         <p className="text-sm text-gray-500">Enter your credentials to access your account</p>
                     </div>
 
+                    {Loginerror && (
+                        <div className="bg-red-100 text-red-700 p-3 rounded mb-4 max-w-sm text-center">
+                            {getErrorMessage(Loginerror)}
+                        </div>
+                    )}
+
                     <div className="flex flex-row gap-5">
                         <button onClick={() => signIn("google", { callbackUrl: "/dashboard" })} className="cursor-pointer flex flex-row gap-3 px-6 py-1.5 bg-white rounded-md text-black text-sm font-medium items-center justify-center border border-gray-400">
                             Login with Google
@@ -71,6 +96,8 @@ const LoginPage = () => {
                             Login with LinkedIn
                         </button>
                     </div>
+
+
 
                     <div className="flex flex-row items-center gap-2 max-w-sm">
                         <hr className="flex-grow border-gray-300" />

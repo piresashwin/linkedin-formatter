@@ -16,6 +16,7 @@
     "bcrypt-edge": "^0.1.0",
     "bson": "^6.10.3",
     "linkedin-formatter": "file:",
+    "luxon": "^3.6.1",
     "motion": "^12.6.3",
     "next": "15.2.4",
     "next-auth": "^5.0.0-beta.25",

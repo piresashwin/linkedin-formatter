@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -16,8 +16,15 @@ const signupSchema = z.object({
 });
 
 const SignupPage = () => {
+    const { data: session } = useSession();
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+
+    if (session && session?.user?.id) {
+        // Redirect to dashboard if already logged in
+        router.push("/dashboard");
+    }
+
 
     const {
         register,

@@ -5,11 +5,25 @@ import { saltAndHashPassword, verifyPassword } from "./lib/password";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 import { ObjectId } from "bson";
+import LinkedIn from "next-auth/providers/linkedin";
 
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: PrismaAdapter(prisma),
     providers: [
+        LinkedIn({
+            clientId: process.env.AUTH_LINKEDIN_ID,
+            clientSecret: process.env.AUTH_LINKEDIN_SECRET,
+            profile(profile) {
+                console.error(profile)
+                return {
+                    id: new ObjectId().toString(),
+                    name: profile.name,
+                    email: profile.email ?? null,
+                    image: profile.picture ?? null,
+                };
+            },
+        }),
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET
@@ -155,4 +169,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return true; // Allow the sign-in
         },
     },
+    pages: {
+        signIn: "/login",
+    }
 })
